@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * <code>CommandLineHandler</code> is used when the emulator is run from the CLI.
- * This makes it so the emulator can be run without a GUI.
+ * <code>CommandLineHandler</code> is used when the simulator is run from the CLI.
+ * This makes it so the simulator can be run without a GUI.
  *
  * @author Rodrigo Bautista Hernández, 2025
  *
@@ -24,7 +24,7 @@ public class CommandLineHandler implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (args.length == 0) {
-            System.out.println("Usage: java -jar emulator.jar <path-to-file>");
+            System.out.println("Usage: java -jar simulator.jar <path-to-file>");
             return;
         }
 

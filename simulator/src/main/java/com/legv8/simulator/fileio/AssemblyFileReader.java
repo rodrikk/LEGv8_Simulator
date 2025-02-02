@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * <code>AssemblyFileReader</code> is used to read assembly code files from the path
- * given to the <code>CommandLineHandler</code> when the emulator is run from the CLI.
+ * given to the <code>CommandLineHandler</code> when the simulator is run from the CLI.
  *
  * @see    CommandLineHandler
  * @author Rodrigo Bautista Hernández, 2025
