@@ -1,11 +1,13 @@
 package com.legv8.simulator.fileio;
 
 import com.legv8.simulator.cli.CommandLineHandler;
+import com.legv8.simulator.lexer.TextLine;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,6 +22,15 @@ import java.util.List;
 public class AssemblyFileReader {
 
     public List<String> readFile(String filePath) throws IOException {
-        return Files.readAllLines(Path.of(filePath));
+        return Files.readAllLines(Path.of(filePath)).stream()
+                .map(String::trim)
+                .toList();
+    }
+
+    public ArrayList<TextLine> readAsTextLines(String filePath) throws IOException {
+        return new ArrayList<>(Files.readAllLines(Path.of(filePath)).stream()
+                .map(String::trim)
+                .map(TextLine::new)
+                .toList());
     }
 }
