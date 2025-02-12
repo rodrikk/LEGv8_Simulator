@@ -1,4 +1,4 @@
-package com.legv8.simulator.common;
+package com.legv8.simulator.response;
 
 /**
  * Generic class to hold runtime and compile time errors with their messages to be displayed to the user.

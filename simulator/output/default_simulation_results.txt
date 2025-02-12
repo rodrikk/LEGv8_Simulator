@@ -1,0 +1,1 @@
+CPUSnapshot{registerFile=[1, 1, 2, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 268435456, 549755813884, 0, 0, 0], Nflag=false, Zflag=false, Cflag=false, Vflag=false}

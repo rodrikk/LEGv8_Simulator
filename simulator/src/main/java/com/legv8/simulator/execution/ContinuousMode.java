@@ -1,6 +1,9 @@
 package com.legv8.simulator.execution;
 
 import com.legv8.simulator.lexer.TextLine;
+import com.legv8.simulator.response.CPUSnapshot;
+import com.legv8.simulator.response.LineError;
+import com.legv8.simulator.response.ResultWrapper;
 
 import java.util.ArrayList;
 
@@ -24,5 +27,14 @@ public class ContinuousMode extends LEGv8_Simulator {
         super(code);
     }
 
-
+    /**
+     * Run the cpu with the generated list of instructions until completion (or not if infinite loop)
+     */
+    public ResultWrapper<CPUSnapshot, LineError> runWithResult() {
+        ResultWrapper<CPUSnapshot, LineError> result = cpu.run(cpuInstructions, memory);
+        if(result.isFailure()) {
+            runtimeError = result.getError();
+        }
+        return result;
+    }
 }

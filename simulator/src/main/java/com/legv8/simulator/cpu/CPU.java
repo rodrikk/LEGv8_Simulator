@@ -1,9 +1,11 @@
 package com.legv8.simulator.cpu;
 
-import com.legv8.simulator.common.LineError;
+import com.legv8.simulator.response.CPUSnapshot;
+import com.legv8.simulator.response.LineError;
 import com.legv8.simulator.instruction.Instruction;
 import com.legv8.simulator.memory.Memory;
 import com.legv8.simulator.memory.SegmentFaultException;
+import com.legv8.simulator.response.ResultWrapper;
 
 import java.util.ArrayList;
 
@@ -14,6 +16,7 @@ import java.util.ArrayList;
  * references to a list of instructions and a data memory must be supplied.
  *
  * @author Jonathan Wright, 2016
+ * @author Rodrigo Bautista Hernández, 2025
  */
 
 /*
@@ -114,19 +117,19 @@ public class CPU {
      * @param memory			a reference to the data memory used in data transfer instructions
      * @return					an <code>LineError</code> object, <code>null</code> if no error occurs during execution
      */
-    public LineError run(ArrayList<Instruction> cpuInstructions, Memory memory) {
+    public ResultWrapper<CPUSnapshot, LineError> run(ArrayList<Instruction> cpuInstructions, Memory memory) {
         try {
             while (instructionIndex < cpuInstructions.size()) {
                 execute(cpuInstructions.get(instructionIndex++), memory);
             }
         } catch (SegmentFaultException sfe) {
-            return new LineError(sfe.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber());
+            return ResultWrapper.failure(new LineError(sfe.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
         } catch (PCAlignmentException pcae) {
-            return new LineError(pcae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber());
+            return ResultWrapper.failure(new LineError(pcae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
         } catch (SPAlignmentException spae) {
-            return new LineError(spae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber());
+            return ResultWrapper.failure(new LineError(spae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
         }
-        return null;
+        return ResultWrapper.success(new CPUSnapshot(this));
     }
 
     /**

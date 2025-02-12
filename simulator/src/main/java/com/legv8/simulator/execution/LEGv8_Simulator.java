@@ -1,10 +1,12 @@
 package com.legv8.simulator.execution;
 
-import com.legv8.simulator.common.LineError;
+import com.legv8.simulator.response.CPUSnapshot;
+import com.legv8.simulator.response.LineError;
 import com.legv8.simulator.cpu.CPU;
 import com.legv8.simulator.instruction.*;
 import com.legv8.simulator.lexer.TextLine;
 import com.legv8.simulator.memory.Memory;
+import com.legv8.simulator.response.ResultWrapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,7 +104,10 @@ public abstract class LEGv8_Simulator {
      * Run the cpu with the generated list of instructions until completion (or not if infinite loop)
      */
     public void runCPU() {
-        runtimeError = cpu.run(cpuInstructions, memory);
+        ResultWrapper<CPUSnapshot,LineError> result = cpu.run(cpuInstructions, memory);
+        if(result.isFailure()) {
+            runtimeError = result.getError();
+        }
     }
 
     /**
