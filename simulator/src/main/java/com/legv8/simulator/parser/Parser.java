@@ -58,7 +58,6 @@ public class Parser {
         }
         try {
             parserState = parserState.transition(new Token(m.type, null));
-            // will never fail
         } catch (UnsupportedInstructionException e) {}
         catch (InvalidTokenException e) {}
         catch (UnexpectedTokenException e) {}

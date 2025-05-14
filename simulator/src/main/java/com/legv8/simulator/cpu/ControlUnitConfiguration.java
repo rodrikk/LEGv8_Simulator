@@ -21,7 +21,9 @@ public enum ControlUnitConfiguration {
     RISI(false, false, false, false, false, false, false, false, true, 2, true),
     L(null, true, false, false, false, null, false, false, null, null, false),
     L_COND(null, false, true, false, false, null, false, false, null, null, false),
-    RL(true, false, false, true, false, null, false, false, false, 1, false);
+    RL(true, false, false, true, false, null, false, false, false, 1, false),
+    SVC(false,true,false,false,false,false,false,false,false,null, false),
+    ERET(false,true,false,false,false,false,false,true,false,null, false);
 
     /**
      * @param reg2Loc		the value of the Reg2Loc control signal

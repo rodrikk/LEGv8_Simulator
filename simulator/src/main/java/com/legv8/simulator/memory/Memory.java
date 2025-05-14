@@ -31,6 +31,10 @@ public class Memory {
     public static final int BYTE_SIZE = 1;
     public static final int BITS_IN_BYTE = 8;
 
+    ByteBuffer buffer;
+    private long staticDataSegmentOffset;
+    private HashMap<Long, Byte> memory;
+
     /**
      * Memory constructor with a specified number of instructions.
      * @param numInstructions	the number of instructions in the LEGv8 program being compiled/executed.
@@ -191,7 +195,8 @@ public class Memory {
         return staticDataSegmentOffset;
     }
 
-    ByteBuffer buffer;
-    private long staticDataSegmentOffset;
-    private HashMap<Long, Byte> memory;
+    @Override
+    public String toString() {
+        return "Memory" + memory;
+    }
 }

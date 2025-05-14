@@ -13,6 +13,12 @@ import java.util.Arrays;
  */
 public class CPUSnapshot {
     private long[] registerFile = new long[CPU.NUM_REGISTERS];
+    private String[] registerNames = new String[]{
+            "X0",  "X1",  "X2",  "X3",  "X4",  "X5",  "X6",  "X7",
+            "X8",  "X9",  "X10", "X11", "X12", "X13", "X14", "X15",
+            "IP0", "IP1", "X18", "X19", "X20", "X21", "X22", "X23",
+            "X24", "X25", "X26", "X27" , "SP",  "FP",  "LR", "XZR"
+    };
     private boolean Nflag;
     private boolean Zflag;
     private boolean Cflag;
@@ -67,14 +73,18 @@ public class CPUSnapshot {
         return Vflag;
     }
 
+    public String[] getRegisterNames() {
+        return registerNames;
+    }
+
     @Override
     public String toString() {
-        return "CPUSnapshot{" +
-                "registerFile=" + Arrays.toString(registerFile) +
-                ", Nflag=" + Nflag +
-                ", Zflag=" + Zflag +
-                ", Cflag=" + Cflag +
-                ", Vflag=" + Vflag +
-                '}';
+        String ret = "Registers:";
+
+        for (int i = 0; i<CPU.NUM_REGISTERS; i++) {
+            ret += "\n" + registerNames[i] + " = " + registerFile[i];
+        }
+
+        return ret;
     }
 }

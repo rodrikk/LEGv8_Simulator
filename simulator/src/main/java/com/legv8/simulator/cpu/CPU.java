@@ -7,7 +7,9 @@ import com.legv8.simulator.memory.Memory;
 import com.legv8.simulator.memory.SegmentFaultException;
 import com.legv8.simulator.response.ResultWrapper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * The <code>CPU</code> class is a single cycle simulator of the LEGv8 instruction set.
@@ -63,6 +65,17 @@ public class CPU {
     public static final int X2 = 2;
     public static final int X1 = 1;
     public static final int X0 = 0;
+
+    private boolean branchTaken = false;
+    private boolean STXRSucceed = false;
+    private StringBuilder cpuLog = new StringBuilder("");
+    private long[] registerFile;
+    private long taggedAddress;
+    private int instructionIndex;
+    private boolean Nflag;
+    private boolean Zflag;
+    private boolean Cflag;
+    private boolean Vflag;
 
     /**
      * Constructs a new <code>CPU</code> object, initialising registers and flags to 0 and false respectively.
@@ -277,154 +290,58 @@ public class CPU {
         branchTaken = false; // rather ugly but... set to false by default as most instructions are not branches.
         //if a branch instruction is executed and the branch is taken, will be set to true in that instruction method
         switch (ins.getMnemonic()) {
-            case ADD :
-                ADD(args[0], args[1], args[2]);
-                break;
-            case ADDS :
-                ADDS(args[0], args[1], args[2]);
-                break;
-            case ADDI :
-                ADDI(args[0], args[1], args[2]);
-                break;
-            case ADDIS :
-                ADDIS(args[0], args[1], args[2]);
-                break;
-            case SUB :
-                SUB(args[0], args[1], args[2]);
-                break;
-            case SUBS :
-                SUBS(args[0], args[1], args[2]);
-                break;
-            case SUBI :
-                SUBI(args[0], args[1], args[2]);
-                break;
-            case SUBIS :
-                SUBIS(args[0], args[1], args[2]);
-                break;
-            case AND :
-                AND(args[0], args[1], args[2]);
-                break;
-            case ANDS :
-                ANDS(args[0], args[1], args[2]);
-                break;
-            case ANDI :
-                ANDI(args[0], args[1], args[2]);
-                break;
-            case ANDIS :
-                ANDIS(args[0], args[1], args[2]);
-                break;
-            case ORR :
-                ORR(args[0], args[1], args[2]);
-                break;
-            case ORRI :
-                ORRI(args[0], args[1], args[2]);
-                break;
-            case EOR :
-                EOR(args[0], args[1], args[2]);
-                break;
-            case EORI :
-                EORI(args[0], args[1], args[2]);
-                break;
-            case LSL :
-                LSL(args[0], args[1], args[2]);
-                break;
-            case LSR :
-                LSR(args[0], args[1], args[2]);
-                break;
-            case LDUR :
-                LDUR(args[0], args[1], args[2], memory);
-                break;
-            case STUR :
-                STUR(args[0], args[1], args[2], memory);
-                break;
-            case LDURSW :
-                LDURSW(args[0], args[1], args[2], memory);
-                break;
-            case STURW :
-                STURW(args[0], args[1], args[2], memory);
-                break;
-            case LDURH :
-                LDURH(args[0], args[1], args[2], memory);
-                break;
-            case STURH :
-                STURH(args[0], args[1], args[2], memory);
-                break;
-            case LDURB :
-                LDURB(args[0], args[1], args[2], memory);
-                break;
-            case STURB :
-                STURB(args[0], args[1], args[2], memory);
-                break;
-            case LDXR :
-                LDXR(args[0], args[1], args[2], memory);
-                break;
-            case STXR :
-                STXR(args[0], args[1], args[2], args[3], memory);
-                break;
-            case MOVZ :
-                MOVZ(args[0], args[1], args[2]);
-                break;
-            case MOVK :
-                MOVK(args[0], args[1], args[2]);
-                break;
-            case CBZ :
-                CBZ(args[0], args[1]);
-                break;
-            case CBNZ :
-                CBNZ(args[0], args[1]);
-                break;
-            case BEQ :
-                BEQ(args[0]);
-                break;
-            case BNE :
-                BNE(args[0]);
-                break;
-            case BHS :
-                BHS(args[0]);
-                break;
-            case BLO :
-                BLO(args[0]);
-                break;
-            case BHI :
-                BHI(args[0]);
-                break;
-            case BLS :
-                BLS(args[0]);
-                break;
-            case BGE :
-                BGE(args[0]);
-                break;
-            case BLT :
-                BLT(args[0]);
-                break;
-            case BGT :
-                BGT(args[0]);
-                break;
-            case BLE :
-                BLE(args[0]);
-                break;
-            case BMI :
-                BMI(args[0]);
-                break;
-            case BPL :
-                BPL(args[0]);
-                break;
-            case BVS :
-                BVS(args[0]);
-                break;
-            case BVC :
-                BVC(args[0]);
-                break;
-            case B :
-                B(args[0]);
-                break;
-            case BR :
-                BR(args[0], memory);
-                break;
-            case BL :
-                BL(args[0]);
-                break;
-            default : {}
+            case ADD -> ADD(args[0], args[1], args[2]);
+            case ADDS -> ADDS(args[0], args[1], args[2]);
+            case ADDI -> ADDI(args[0], args[1], args[2]);
+            case ADDIS -> ADDIS(args[0], args[1], args[2]);
+            case SUB -> SUB(args[0], args[1], args[2]);
+            case SUBS -> SUBS(args[0], args[1], args[2]);
+            case SUBI -> SUBI(args[0], args[1], args[2]);
+            case SUBIS -> SUBIS(args[0], args[1], args[2]);
+            case AND -> AND(args[0], args[1], args[2]);
+            case ANDS -> ANDS(args[0], args[1], args[2]);
+            case ANDI -> ANDI(args[0], args[1], args[2]);
+            case ANDIS -> ANDIS(args[0], args[1], args[2]);
+            case ORR -> ORR(args[0], args[1], args[2]);
+            case ORRI -> ORRI(args[0], args[1], args[2]);
+            case EOR -> EOR(args[0], args[1], args[2]);
+            case EORI -> EORI(args[0], args[1], args[2]);
+            case LSL -> LSL(args[0], args[1], args[2]);
+            case LSR -> LSR(args[0], args[1], args[2]);
+            case LDUR -> LDUR(args[0], args[1], args[2], memory);
+            case STUR -> STUR(args[0], args[1], args[2], memory);
+            case LDURSW -> LDURSW(args[0], args[1], args[2], memory);
+            case STURW -> STURW(args[0], args[1], args[2], memory);
+            case LDURH -> LDURH(args[0], args[1], args[2], memory);
+            case STURH -> STURH(args[0], args[1], args[2], memory);
+            case LDURB -> LDURB(args[0], args[1], args[2], memory);
+            case STURB -> STURB(args[0], args[1], args[2], memory);
+            case LDXR -> LDXR(args[0], args[1], args[2], memory);
+            case STXR -> STXR(args[0], args[1], args[2], args[3], memory);
+            case MOVZ -> MOVZ(args[0], args[1], args[2]);
+            case MOVK -> MOVK(args[0], args[1], args[2]);
+            case CBZ -> CBZ(args[0], args[1]);
+            case CBNZ -> CBNZ(args[0], args[1]);
+            case BEQ -> BEQ(args[0]);
+            case BNE -> BNE(args[0]);
+            case BHS -> BHS(args[0]);
+            case BLO -> BLO(args[0]);
+            case BHI -> BHI(args[0]);
+            case BLS -> BLS(args[0]);
+            case BGE -> BGE(args[0]);
+            case BLT -> BLT(args[0]);
+            case BGT -> BGT(args[0]);
+            case BLE -> BLE(args[0]);
+            case BMI -> BMI(args[0]);
+            case BPL -> BPL(args[0]);
+            case BVS -> BVS(args[0]);
+            case BVC -> BVC(args[0]);
+            case B -> B(args[0]);
+            case BR -> BR(args[0], memory);
+            case BL -> BL(args[0]);
+            case SVC -> SVC(args[0], memory);
+            default -> {
+            }
         }
     }
 
@@ -882,14 +799,44 @@ public class CPU {
         cpuLog.append("BL \t" + "0x" + Long.toHexString(registerFile[LR]) + " \n");
     }
 
-    private boolean branchTaken = false;
-    private boolean STXRSucceed = false;
-    private StringBuilder cpuLog = new StringBuilder("");
-    private long[] registerFile;
-    private long taggedAddress;
-    private int instructionIndex;
-    private boolean Nflag;
-    private boolean Zflag;
-    private boolean Cflag;
-    private boolean Vflag;
+    private void SVC(int imm, Memory memory) {
+        switch (imm) {
+            case 0 -> {
+                long address = registerFile[X1];
+                StringBuilder sb = new StringBuilder();
+
+                try {
+                    long b;
+                    while ((b = memory.loadByte(address)) != 0) { // lee hasta null terminator
+                        sb.append((char) b);
+                        address++;
+                    }
+                    System.out.print(sb);
+                } catch (SegmentFaultException e) {
+                    System.err.println("Memory access error during string print: " + e.getMessage());
+                }
+            }
+            case 1 -> {
+                Scanner scanner = new Scanner(System.in);
+                System.out.println("Debug channel listening...");
+                String input = scanner.nextLine().replace("\\n", "\n");;
+                byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+                for (int i = 0; i < bytes.length; i++) {
+                    try {
+                        memory.storeByte(registerFile[X1] + i, bytes[i]);
+                    } catch (SegmentFaultException e) {
+                        System.err.println("Memory access error during string read: " + e.getMessage());
+                    }
+                }
+                try {
+                    memory.storeByte((registerFile[X1]+bytes.length), (byte) 0);
+                } catch (SegmentFaultException e) {
+                    System.err.println("Memory access error during string read: " + e.getMessage());
+                }
+            }
+            default -> {
+                System.err.println("SVC immediate code operation not implemented.");
+            }
+        }
+    }
 }

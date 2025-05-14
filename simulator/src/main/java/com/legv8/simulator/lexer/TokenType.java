@@ -1,5 +1,7 @@
 package com.legv8.simulator.lexer;
 
+import com.legv8.simulator.parser.Parser;
+
 /**
  * The <code>TokenType</code> enumeration uses regular expressions to define
  * all valid lexical tokens in the LEGv8 assembly language.
@@ -19,20 +21,21 @@ public enum TokenType {
     COMMA("\\,", 3, ","),
     IMMEDIATE("#?-?0[xX][0-9a-fA-F]+|#?-?[0-9]+", 4, "IMMEDIATE"),
     REGISTER("[Xx][12][0-9]|[Xx]30|[Xx][0-9]|XZR|xzr|SP|sp|LR|lr|FP|fp|IP[01]|ip[01]", 5, "REGISTER"),
-    MNEMONIC_R("BR[ \t]+|br[ \t]+", 6, "MNEMONIC"),
-    MNEMONIC_RISI("MOV[ZK][ \t]+|mov[zk][ \t]+", 7, "MNEMONIC"),
-    MNEMONIC_RI("CMPI[ \t]+|cmpi[ \t]+", 8, "MNEMONIC"),
-    MNEMONIC_RR("CMP[ \t]+|MOV[ \t]+|cmp[ \t]+|mov[ \t]+", 9, "MNEMONIC"),
-    MNEMONIC_RRI("ADDIS?[ \t]+|SUBIS?[ \t]+|ANDIS?[ \t]+|ORRI[ \t]+|EORI[ \t]+|LS[LR][ \t]+|addis?[ \t]+|subis?[ \t]+|andis?[ \t]+|orri[ \t]+|eori[ \t]+|ls[lr][ \t]+", 10, "MNEMONIC"),
-    MNEMONIC_RRR("ADDS?[ \t]+|SUBS?[ \t]+|ANDS?[ \t]+|ORR[ \t]+|EOR[ \t]+|adds?[ \t]+|subs?[ \t]+|ands?[ \t]+|orr[ \t]+|eor[ \t]+", 11, "MNEMONIC"),
-    MNEMONIC_RM("LDURSW[ \t]+|LDUR[HB]?[ \t]+|LDXR[ \t]+|STUR[WHB]?[ \t]+|ldursw[ \t]+|ldur[hb]?[ \t]+|ldxr[ \t]+|stur[whb]?[ \t]+", 12, "MNEMONIC"),
-    MNEMONIC_RRM("STXR[ \t]+|stxr[ \t]+", 13, "MNEMONIC"),
-    MNEMONIC_L("B\\.[GNL]E[ \t]+|B\\.[HL]S[ \t]+|B\\.[LG]T[ \t]+|B\\.LO[ \t]+|B\\.[MH]I[ \t]+|B\\.EQ[ \t]+|B\\.V[SC][ \t]+|B\\.PL[ \t]+|B[RL]?[ \t]+|b\\.[gnl]e[ \t]+|b\\.[hl]s[ \t]+|b\\.[lg]t[ \t]+|b\\.lo[ \t]+|b\\.[mh]i[ \t]+|b\\.eq[ \t]+|b\\.v[sc][ \t]+|b\\.pl[ \t]+|b[rl]?[ \t]+", 14, "MNEMONIC"),
-    MNEMONIC_RL("CBN?Z[ \t]+|cbn?z[ \t]+", 15, "MNEMONIC"),
-    LABEL("[A-Za-z0-9_]+:", 16, "LABEL"),
-    IDENTIFIER("[A-Za-z0-9_]+", 17, "IDENTIFIER"),
-    WHITESPACE("[ \t]+", 18, "WHITESPACE"),
-    ERROR("[^\\s]+", 19, "ERROR");
+    MNEMONIC_SYS("SVC[ \t]+|svc[ \t]+|ERET[ \t]+|eret[ \t]+", 6, "MNEMONIC"),
+    MNEMONIC_R("BR[ \t]+|br[ \t]+", 7, "MNEMONIC"),
+    MNEMONIC_RISI("MOV[ZK][ \t]+|mov[zk][ \t]+", 8, "MNEMONIC"),
+    MNEMONIC_RI("CMPI[ \t]+|cmpi[ \t]+", 9, "MNEMONIC"),
+    MNEMONIC_RR("CMP[ \t]+|MOV[ \t]+|cmp[ \t]+|mov[ \t]+", 10, "MNEMONIC"),
+    MNEMONIC_RRI("ADDIS?[ \t]+|SUBIS?[ \t]+|ANDIS?[ \t]+|ORRI[ \t]+|EORI[ \t]+|LS[LR][ \t]+|addis?[ \t]+|subis?[ \t]+|andis?[ \t]+|orri[ \t]+|eori[ \t]+|ls[lr][ \t]+", 11, "MNEMONIC"),
+    MNEMONIC_RRR("ADDS?[ \t]+|SUBS?[ \t]+|ANDS?[ \t]+|ORR[ \t]+|EOR[ \t]+|adds?[ \t]+|subs?[ \t]+|ands?[ \t]+|orr[ \t]+|eor[ \t]+", 12, "MNEMONIC"),
+    MNEMONIC_RM("LDURSW[ \t]+|LDUR[HB]?[ \t]+|LDXR[ \t]+|STUR[WHB]?[ \t]+|ldursw[ \t]+|ldur[hb]?[ \t]+|ldxr[ \t]+|stur[whb]?[ \t]+", 13, "MNEMONIC"),
+    MNEMONIC_RRM("STXR[ \t]+|stxr[ \t]+", 14, "MNEMONIC"),
+    MNEMONIC_L("B\\.[GNL]E[ \t]+|B\\.[HL]S[ \t]+|B\\.[LG]T[ \t]+|B\\.LO[ \t]+|B\\.[MH]I[ \t]+|B\\.EQ[ \t]+|B\\.V[SC][ \t]+|B\\.PL[ \t]+|B[RL]?[ \t]+|b\\.[gnl]e[ \t]+|b\\.[hl]s[ \t]+|b\\.[lg]t[ \t]+|b\\.lo[ \t]+|b\\.[mh]i[ \t]+|b\\.eq[ \t]+|b\\.v[sc][ \t]+|b\\.pl[ \t]+|b[rl]?[ \t]+", 15, "MNEMONIC"),
+    MNEMONIC_RL("CBN?Z[ \t]+|cbn?z[ \t]+|ADR[ \t]+|adr[ \t]+", 16, "MNEMONIC"),
+    LABEL("[A-Za-z0-9_]+:", 17, "LABEL"),
+    IDENTIFIER("[A-Za-z0-9_]+", 18, "IDENTIFIER"),
+    WHITESPACE("[ \t]+", 19, "WHITESPACE"),
+    ERROR("[^\\s]+", 20, "ERROR");
 
     /**
      * The regular expression pattern used to specify this <code>TokenType</code>

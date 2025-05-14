@@ -60,7 +60,10 @@ public enum Mnemonic {
     BL("BL", "bl", TokenType.MNEMONIC_L, "100101", null),
     CMP("CMP", "cmp", TokenType.MNEMONIC_RR, null, null),
     CMPI("CMPI", "cmpi", TokenType.MNEMONIC_RI, null, null),
-    MOV("MOV", "mov", TokenType.MNEMONIC_RR, null, null);
+    MOV("MOV", "mov", TokenType.MNEMONIC_RR, null, null),
+    SVC("SVC", "svc", TokenType.MNEMONIC_SYS, null, null),
+    ERET("ERET", "eret", TokenType.MNEMONIC_SYS, null, null),
+    ADR("ADR", "adr", TokenType.MNEMONIC_RL, null, null);
 
     /**
      * @param nameUpper			lower case string representation of the instruction mnemonic

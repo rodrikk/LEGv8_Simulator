@@ -198,6 +198,10 @@ public abstract class LEGv8_Simulator {
         return currentLineNumber;
     }
 
+    public Memory getMemory() {
+        return memory;
+    }
+
     protected ArrayList<TextLine> code;
     protected int currentLineNumber;
     protected LineError runtimeError = null;

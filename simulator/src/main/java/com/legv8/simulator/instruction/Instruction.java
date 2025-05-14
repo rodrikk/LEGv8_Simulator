@@ -1,5 +1,6 @@
 package com.legv8.simulator.instruction;
 
+import com.legv8.simulator.cpu.CPU;
 import com.legv8.simulator.cpu.ControlUnitConfiguration;
 
 /**

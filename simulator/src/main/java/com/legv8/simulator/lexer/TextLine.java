@@ -71,9 +71,7 @@ public class TextLine {
                 case LBRACKET : break;
                 case RBRACKET : break;
                 case LABEL : label = t.getData().substring(0, t.getData().length()-1); break;
-                case REGISTER : args.add(t.getData()); break;
-                case IMMEDIATE : args.add(t.getData()); break;
-                case IDENTIFIER : args.add(t.getData()); break;
+                case REGISTER, IMMEDIATE, IDENTIFIER: args.add(t.getData()); break;
                 // following case should never occur - parser never accepts ERROR tokens
                 case ERROR : comment += "something has gone very wrong for this to happen!"; break;
                 default :

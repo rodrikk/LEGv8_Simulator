@@ -105,6 +105,10 @@ public class Decoder {
                     new Instruction(mnemonic, decodeLArgs(args, branchTable), lineNumber, ControlUnitConfiguration.L_COND);
             case BVC ->
                     new Instruction(mnemonic, decodeLArgs(args, branchTable), lineNumber, ControlUnitConfiguration.L_COND);
+            case SVC ->
+                    new Instruction(mnemonic, decodeSVCArgs(args), lineNumber, ControlUnitConfiguration.SVC);
+            case ERET ->
+                    new Instruction(mnemonic, decodeERETArgs(), lineNumber, ControlUnitConfiguration.ERET);
             case B -> new Instruction(mnemonic, decodeLArgs(args, branchTable), lineNumber, ControlUnitConfiguration.L);
             case BR -> new Instruction(mnemonic, decodeRArgs(args), lineNumber, null);
             case BL -> new Instruction(mnemonic, decodeLArgs(args, branchTable), lineNumber, null);
@@ -310,5 +314,17 @@ public class Decoder {
             return result;
         }
         throw new ImmediateOutOfBoundsException(imm, EXCLUSIVE_IMM);
+    }
+
+    private static int[] decodeERETArgs() {
+        int[] operands = new int[1];
+
+        return operands;
+    }
+
+    private static int[] decodeSVCArgs(ArrayList<String> args) {
+        int[] operands = new int[1];
+        operands[0] = parseImmediate(args.get(0));
+        return operands;
     }
 }
