@@ -35,6 +35,7 @@ It's designed to help students experiment with assembly code execution, includin
  - The assembly code should be formated like normal assembly code files.
  - The expected result files should have different registers in different lines (separated by line breaks) </br> with spaces and an equals in between like: ```X1 = 25```.
 
+### Running from the CLI
 
 ```bash
 # Run a single program
@@ -43,3 +44,19 @@ java -jar simulator.jar path/to/program.s false true path/to/expected.txt true p
 # Run multiple programs in a folder (bulk mode)
 java -jar simulator.jar path/to/folder true true path/to/expected.txt false path/to/results.txt
 ```
+
+## Using software interrupts
+## 🛠 System Calls (SVC)
+
+| IMM | Function            | Inputs                                                                                     | Output / Effect                                              | Notes                                   |
+|-----|---------------------|--------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------------------------|
+| 0   | Print string        | `X1`: Memory address of string<br>`X2`: Length of string in bytes                          | Prints the string to console                                 | Must be null-terminated or bounded by X2 |
+| 1   | Read string         | `X1`: Destination memory address                                                           | `X2`: Number of bytes written (including null terminator)    | Converts `\\n` into real newline        |
+| 2   | Open file           | `X1`: Memory address of filename (null-terminated)<br>`X2`: 1 for write, 0 for read        | `X0`: File ID or -1 on failure                               | Creates the file if it doesn't exist    |
+| 3   | Close file          | `X1`: File ID                                                                              | -                                                            | -                                       |
+| 4   | Read file           | `X0`: File ID<br>`X1`: Destination memory<br>`X2`: Number of bytes to read (-1 = all)      | `X0`: Number of bytes read, or -1 on failure                 | Content is null-terminated in memory    |
+| 5   | Write file          | `X0`: File ID<br>`X1`: Source memory address<br>`X2`: Number of bytes to write from memory | `X0`: Number of bytes written, or -1 on failure              | -                                       |
+| 6   | Rename file         | `X1`: Address of current filename<br>`X2`: Address of new filename                         | `X0`: 0 if success, -1 if failure                            | Uses Java `Files.move()`                |
+| 7   | Delete file         | `X1`: Address of filename                                                                  | `X0`: 0 if success, -1 if failure                            | Uses Java `Files.delete()`              |
+| 8   | Clock (time elapsed)| -                                                                                          | `X0`: Milliseconds since start of execution                  | Timer starts with program execution     |
+| 9   | Terminate program   | -                                                                                          | Halts the simulator                                          | Internally throws `EndExecutionException` |
