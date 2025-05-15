@@ -135,6 +135,8 @@ public class CPU {
             return new LineError(spae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber());
         } catch (IOException ioe) {
             return new LineError(ioe.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber());
+        } catch (EndExecutionException eee) {
+            return new LineError(eee.getMessage(), eee.getLine());
         }
         return null;
     }
@@ -159,6 +161,8 @@ public class CPU {
             return ResultWrapper.failure(new LineError(spae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
         } catch (IOException ioe) {
             return ResultWrapper.failure(new LineError(ioe.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
+        } catch (EndExecutionException eee) {
+            return ResultWrapper.failure(new LineError(eee.getMessage(), eee.getLine()));
         }
         this.endTime = System.currentTimeMillis();
         return ResultWrapper.success(new CPUSnapshot(this));
@@ -304,7 +308,7 @@ public class CPU {
     }
 
     private void execute(Instruction ins, Memory memory)
-            throws SegmentFaultException, PCAlignmentException, SPAlignmentException, IOException {
+            throws SegmentFaultException, PCAlignmentException, SPAlignmentException, IOException, EndExecutionException {
         int[] args = ins.getArgs();
         branchTaken = false; // rather ugly but... set to false by default as most instructions are not branches.
         //if a branch instruction is executed and the branch is taken, will be set to true in that instruction method
@@ -818,7 +822,7 @@ public class CPU {
         cpuLog.append("BL \t" + "0x" + Long.toHexString(registerFile[LR]) + " \n");
     }
 
-    private void SVC(int imm, Memory memory) throws SegmentFaultException, IOException {
+    private void SVC(int imm, Memory memory) throws SegmentFaultException, IOException, EndExecutionException {
         switch (imm) {
             case 0 -> {
                 long address = registerFile[X1];
@@ -978,6 +982,9 @@ public class CPU {
             case 8 -> {
                 long now = System.currentTimeMillis();
                 registerFile[X0] = now - startTime;
+            }
+            case 9 -> {
+                throw new EndExecutionException(this.instructionIndex-1);
             }
             default -> System.err.println("SVC immediate code operation not implemented.");
         }

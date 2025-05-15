@@ -13,6 +13,7 @@ import java.util.Objects;
  *
  * @see Parser
  * @author Jonathan Wright, 2016
+ * @author Rodrigo Bautista Hernández, 2025
  */
 public enum ParserState {
     INIT(false, null) {

@@ -7,6 +7,7 @@ import com.legv8.simulator.parser.Parser;
  * all valid lexical tokens in the LEGv8 assembly language.
  *
  * @author Jonathan Wright, 2016
+ * @author Rodrigo Bautista Hernández
  */
 
 /* Instruction mnemonics and immediates which contain letters from the English alphabet

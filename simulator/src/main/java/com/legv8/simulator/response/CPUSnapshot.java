@@ -2,14 +2,13 @@ package com.legv8.simulator.response;
 
 import com.legv8.simulator.cpu.CPU;
 
-import java.util.Arrays;
-
 /**
  * <code>CPUSnpashot</code> provides a deep copy of the <code>CPU</code> state for use in the pipeline simulator.
  *
  * @see CPU
  *
  * @author Jonathan Wright, 2016
+ * @author Rodrigo Bautista Hernández, 2025
  */
 public class CPUSnapshot {
     private long[] registerFile = new long[CPU.NUM_REGISTERS];
