@@ -30,6 +30,12 @@ public class LineError {
         return lineNumber;
     }
 
+    @Override
+    public String toString() {
+        return "Line " + lineNumber + ": " + errorMsg;
+
+    }
+
     private String errorMsg;
     private int lineNumber;
 }

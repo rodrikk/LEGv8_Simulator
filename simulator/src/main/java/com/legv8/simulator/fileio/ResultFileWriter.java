@@ -25,7 +25,7 @@ import java.util.List;
 public class ResultFileWriter {
 
     // Default file path
-    private static final String DEFAULT_FILE_PATH = "output/default_simulation_results.txt";
+    public static final String DEFAULT_FILE_PATH = "output/default_simulation_results.txt";
 
     /**
      * Writes a list of strings to a file. Each string will be written as a new line.
@@ -65,7 +65,7 @@ public class ResultFileWriter {
         }
 
         // Write all lines to the file, overwriting any existing content
-        Files.write(path, lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.write(path, lines, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 
     /**
@@ -84,6 +84,6 @@ public class ResultFileWriter {
         }
 
         // Write the content to the file, overwriting any existing content
-        Files.writeString(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.writeString(path, content, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 }

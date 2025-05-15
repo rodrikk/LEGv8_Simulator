@@ -7,8 +7,17 @@ import com.legv8.simulator.memory.Memory;
 import com.legv8.simulator.memory.SegmentFaultException;
 import com.legv8.simulator.response.ResultWrapper;
 
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -29,6 +38,8 @@ import java.util.Scanner;
  */
 
 public class CPU {
+    private Map<Integer, SeekableByteChannel> openFiles = new HashMap<>();
+    private int nextFileId = 3;
 
     public static final int INSTRUCTION_SIZE = 4;
     public static final int NUM_REGISTERS = 32;
@@ -76,6 +87,8 @@ public class CPU {
     private boolean Zflag;
     private boolean Cflag;
     private boolean Vflag;
+    private final long startTime;
+    private long endTime;
 
     /**
      * Constructs a new <code>CPU</code> object, initialising registers and flags to 0 and false respectively.
@@ -93,6 +106,7 @@ public class CPU {
         Zflag = false;
         Cflag = false;
         Vflag = false;
+        startTime = System.currentTimeMillis();
     }
 
     /**
@@ -119,6 +133,8 @@ public class CPU {
             return new LineError(pcae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber());
         } catch (SPAlignmentException spae) {
             return new LineError(spae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber());
+        } catch (IOException ioe) {
+            return new LineError(ioe.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber());
         }
         return null;
     }
@@ -141,7 +157,10 @@ public class CPU {
             return ResultWrapper.failure(new LineError(pcae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
         } catch (SPAlignmentException spae) {
             return ResultWrapper.failure(new LineError(spae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
+        } catch (IOException ioe) {
+            return ResultWrapper.failure(new LineError(ioe.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
         }
+        this.endTime = System.currentTimeMillis();
         return ResultWrapper.success(new CPUSnapshot(this));
     }
 
@@ -285,7 +304,7 @@ public class CPU {
     }
 
     private void execute(Instruction ins, Memory memory)
-            throws SegmentFaultException, PCAlignmentException, SPAlignmentException {
+            throws SegmentFaultException, PCAlignmentException, SPAlignmentException, IOException {
         int[] args = ins.getArgs();
         branchTaken = false; // rather ugly but... set to false by default as most instructions are not branches.
         //if a branch instruction is executed and the branch is taken, will be set to true in that instruction method
@@ -799,21 +818,23 @@ public class CPU {
         cpuLog.append("BL \t" + "0x" + Long.toHexString(registerFile[LR]) + " \n");
     }
 
-    private void SVC(int imm, Memory memory) {
+    private void SVC(int imm, Memory memory) throws SegmentFaultException, IOException {
         switch (imm) {
             case 0 -> {
                 long address = registerFile[X1];
+                int maxBytes = (int) registerFile[X2];
                 StringBuilder sb = new StringBuilder();
 
                 try {
                     long b;
-                    while ((b = memory.loadByte(address)) != 0) { // lee hasta null terminator
+                    for (int i=0; i<maxBytes; i++) {
+                        b = memory.loadByte(address+i);
                         sb.append((char) b);
-                        address++;
                     }
                     System.out.print(sb);
                 } catch (SegmentFaultException e) {
                     System.err.println("Memory access error during string print: " + e.getMessage());
+                    throw(e);
                 }
             }
             case 1 -> {
@@ -826,17 +847,157 @@ public class CPU {
                         memory.storeByte(registerFile[X1] + i, bytes[i]);
                     } catch (SegmentFaultException e) {
                         System.err.println("Memory access error during string read: " + e.getMessage());
+                        throw(e);
                     }
                 }
+                try {
+                    memory.storeByte(registerFile[X1] + bytes.length, 0);
+                } catch (SegmentFaultException e) {
+                    System.err.println("Memory access error during string read: " + e.getMessage());
+                    throw(e);
+                }
+                registerFile[X2] = bytes.length+1;
                 try {
                     memory.storeByte((registerFile[X1]+bytes.length), (byte) 0);
                 } catch (SegmentFaultException e) {
                     System.err.println("Memory access error during string read: " + e.getMessage());
+                    throw(e);
                 }
             }
-            default -> {
-                System.err.println("SVC immediate code operation not implemented.");
+            case 2 -> {
+                long address = registerFile[X1];
+                boolean write = registerFile[X2] == 1;
+                StringBuilder filenameBuilder = new StringBuilder();
+
+                try {
+                    long b;
+                    while ((b = memory.loadByte(address)) != 0) {
+                        filenameBuilder.append((char) b);
+                        address++;
+                    }
+
+                    String filename = filenameBuilder.toString();
+                    Path path = Path.of(filename);
+                    SeekableByteChannel channel = write ? Files.newByteChannel(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE) : Files.newByteChannel(path, StandardOpenOption.READ);
+                    int fileId = nextFileId++;
+                    openFiles.put(fileId, channel);
+                    registerFile[X0] = fileId;
+                } catch (Exception e) {
+                    System.err.println("Failed to open file: " + e.getMessage());
+                    registerFile[X0] = -1;
+                    throw(new IOException("Failed to open file: " + e.getMessage()));
+                }
             }
+            case 3 -> {
+                int fileId = (int) registerFile[X1];
+                SeekableByteChannel channel = openFiles.remove(fileId);
+                try {
+                    if (channel != null) channel.close();
+                } catch (IOException e) {
+                    System.err.println("Failed to close file: " + e.getMessage());
+                    throw(new IOException("Failed to close file: " + e.getMessage()));
+                }
+            }
+            case 4 -> {
+                int fileId = (int) registerFile[X0];
+                long destAddress = registerFile[X1]; // dirección de destino en memoria
+                int maxBytes = (int) registerFile[X2]; // cuántos bytes leer
+
+                SeekableByteChannel channel = openFiles.get(fileId);
+                if (channel == null) {
+                    System.err.println("Invalid file descriptor");
+                    registerFile[X0] = -1;
+                    break;
+                }
+
+                try {
+                    ByteBuffer buffer = (maxBytes==-1) ? ByteBuffer.allocate((int)channel.size()) : ByteBuffer.allocate(maxBytes);
+                    int bytesRead = channel.read(buffer);
+                    buffer.flip();
+                    for (int i = 0; i < bytesRead; i++) {
+                        memory.storeByte(destAddress + i, buffer.get(i));
+                    }
+                    memory.storeByte(destAddress+bytesRead, 0);
+                    registerFile[X0] = bytesRead+1;
+                } catch (Exception e) {
+                    System.err.println("File read failed: " + e.getMessage());
+                    registerFile[X0] = -1;
+                    throw(e);
+                }
+            }
+            case 5 -> {
+                int fileId = (int) registerFile[X0];
+                long srcAddress = registerFile[X1];
+                int byteCount = (int) registerFile[X2];
+
+                SeekableByteChannel channel = openFiles.get(fileId);
+                if (channel == null) {
+                    System.err.println("Invalid file descriptor for write");
+                    registerFile[X0] = -1;
+                    break;
+                }
+
+                ByteBuffer buffer = ByteBuffer.allocate(byteCount);
+                try {
+                    for (int i = 0; i < byteCount; i++) {
+                        byte b = (byte) memory.loadByte(srcAddress + i);
+                        buffer.put(b);
+                    }
+                    buffer.flip();
+                    int bytesWritten = channel.write(buffer);
+                    registerFile[X0] = bytesWritten;
+                } catch (Exception e) {
+                    System.err.println("File write failed: " + e.getMessage());
+                    registerFile[X0] = -1;
+                    throw(new IOException("File write failed: " + e.getMessage()));
+                }
+            }
+            case 6 -> {
+                try {
+                    String oldName = readStringFromMemory(registerFile[X1], memory);
+                    String newName = readStringFromMemory(registerFile[X2], memory);
+                    Files.move(Path.of(oldName), Path.of(newName), StandardCopyOption.REPLACE_EXISTING);
+                    registerFile[X0] = 0;
+                } catch (Exception e) {
+                    System.err.println("File rename failed: " + e.getMessage());
+                    registerFile[X0] = -1;
+                    throw(e);
+                }
+            }
+            case 7 -> {
+                try {
+                    String filename = readStringFromMemory(registerFile[X1], memory);
+                    Files.delete(Path.of(filename));
+                    registerFile[X0] = 0;
+                } catch (Exception e) {
+                    System.err.println("File deletion failed: " + e.getMessage());
+                    registerFile[X0] = -1;
+                    throw(e);
+                }
+            }
+            case 8 -> {
+                long now = System.currentTimeMillis();
+                registerFile[X0] = now - startTime;
+            }
+            default -> System.err.println("SVC immediate code operation not implemented.");
         }
+    }
+
+    private String readStringFromMemory(long address, Memory memory) throws SegmentFaultException {
+        StringBuilder sb = new StringBuilder();
+        long b;
+        while ((b = memory.loadByte(address)) != 0) {
+            sb.append((char) b);
+            address++;
+        }
+        return sb.toString();
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public long getEndTime() {
+        return endTime;
     }
 }

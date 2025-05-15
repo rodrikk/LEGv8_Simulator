@@ -24,6 +24,9 @@ public class CPUSnapshot {
     private boolean Cflag;
     private boolean Vflag;
 
+    private long startTime;
+    private long endTime;
+
     /**
      * @param cpu	the <code>CPU</code> whose state is to be copied
      */
@@ -35,6 +38,8 @@ public class CPUSnapshot {
         Zflag = cpu.getZflag();
         Cflag = cpu.getCflag();
         Vflag = cpu.getVflag();
+        startTime = cpu.getStartTime();
+        endTime = cpu.getEndTime();
     }
 
     /**
@@ -77,6 +82,14 @@ public class CPUSnapshot {
         return registerNames;
     }
 
+    public long getTotalMillis() {
+        return (endTime - startTime);
+    }
+
+    public String getRunTimeString() {
+        return "\nRuntime in milliseconds: " + this.getTotalMillis() + "ms";
+    }
+
     @Override
     public String toString() {
         String ret = "Registers:";
@@ -84,6 +97,8 @@ public class CPUSnapshot {
         for (int i = 0; i<CPU.NUM_REGISTERS; i++) {
             ret += "\n" + registerNames[i] + " = " + registerFile[i];
         }
+
+        ret += "\nRuntime in milliseconds: " + this.getTotalMillis() + "ms";
 
         return ret;
     }
