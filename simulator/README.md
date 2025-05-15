@@ -21,14 +21,14 @@ It's designed to help students experiment with assembly code execution, includin
 ## 📦 How to run
 
 ### Parameters
-| Position | Description                                                                                                      | Example                              |
-| -------- |------------------------------------------------------------------------------------------------------------------|--------------------------------------|
-| 0        | Path to `.s` file or folder with assembly code                                                                   | `./examples/program.s`, `./examples` |
-| 1        | Bulk mode? (`true` or `false`). Must be true if running multiple programs                                        | `false`                              |
+| Position | Description                                                                                                   | Example                              |
+| -------- |---------------------------------------------------------------------------------------------------------------|--------------------------------------|
+| 0        | Path to `.s` file or folder with assembly code                                                                | `./examples/program.s`, `./examples` |
+| 1        | Bulk mode? (`true` or `false`). Must be true if running multiple programs                                     | `false`                              |
 | 2        | Print memory? (`true` or `false`). If true, print out used memory addresses and their values in the results file | `true`                               |
-| 3        | (Optional) Expected results file path. This text file will contain the expected end value for registers          | `./expected/program1.txt`            |
-| 4        | (Optional) Compact output (`true/false`). Limit verbosity of the results file.                                   | `false`                              |
-| 5        | (Optional) Where to save output. Default is ./output/default_simulation_results.txt                              | `./results/output.txt`               |
+| 3        | Expected results file path. This text file will contain the expected end value for registers          | `./expected/program1.txt`            |
+| 4        | Compact output (`true/false`). Limit verbosity of the results file.                                | `false`                              |
+| 5        | Where to save output. Default is ./output/default_simulation_results.txt                           | `./results/output.txt`               |
 
 ### Input files
  - The files with assembly code should have the .s extension.
