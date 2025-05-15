@@ -1,5 +1,6 @@
 package com.legv8.simulator.cpu;
 
+import ch.qos.logback.core.encoder.JsonEscapeUtil;
 import com.legv8.simulator.response.CPUSnapshot;
 import com.legv8.simulator.response.LineError;
 import com.legv8.simulator.instruction.Instruction;
@@ -153,16 +154,13 @@ public class CPU {
             while (instructionIndex < cpuInstructions.size()) {
                 execute(cpuInstructions.get(instructionIndex++), memory);
             }
-        } catch (SegmentFaultException sfe) {
+        } catch (SegmentFaultException | IOException | SPAlignmentException | PCAlignmentException sfe) {
             return ResultWrapper.failure(new LineError(sfe.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
-        } catch (PCAlignmentException pcae) {
-            return ResultWrapper.failure(new LineError(pcae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
-        } catch (SPAlignmentException spae) {
-            return ResultWrapper.failure(new LineError(spae.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
-        } catch (IOException ioe) {
-            return ResultWrapper.failure(new LineError(ioe.getMessage(), cpuInstructions.get(instructionIndex-1).getLineNumber()));
         } catch (EndExecutionException eee) {
             return ResultWrapper.failure(new LineError(eee.getMessage(), eee.getLine()));
+        }
+        catch (OutOfMemoryError oome) {
+            return ResultWrapper.failure(new LineError("Infinite loop prevented. Out of memory.", -1));
         }
         this.endTime = System.currentTimeMillis();
         return ResultWrapper.success(new CPUSnapshot(this));

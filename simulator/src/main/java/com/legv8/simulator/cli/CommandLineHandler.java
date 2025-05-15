@@ -115,7 +115,7 @@ public class CommandLineHandler implements CommandLineRunner {
             if (expectedResultFilePath != null && !expectedResultFilePath.isEmpty()) {
                 boolean success = true;
                 String failingRegisters = "";
-                if (result != null && result.isFailure()) {
+                if (result == null || result.isFailure()) {
                     toPrint.add("Tests FAILED. Run or compile failure.");
                 } else {
                     Map<String, Long> registers;
