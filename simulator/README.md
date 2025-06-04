@@ -39,10 +39,10 @@ It's designed to help students experiment with assembly code execution, includin
 
 ```bash
 # Run a single program
-java -jar simulator.jar path/to/program.s false true path/to/expected.txt true path/to/expected_results.txt
+java -jar simulador-legv8.jar path/to/program.s false true path/to/expected_results.txt true path/to/output.txt
 
 # Run multiple programs in a folder (bulk mode)
-java -jar simulator.jar path/to/folder true true path/to/expected.txt false path/to/expected_results.txt
+java -jar simulador-legv8.jar path/to/folder true true path/to/expected_results.txt false path/to/output.txt
 ```
 
 ## Using software interrupts
