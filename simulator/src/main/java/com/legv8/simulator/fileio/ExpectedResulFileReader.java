@@ -30,6 +30,7 @@ public class ExpectedResulFileReader {
 
         for (String line : lines) {
             String[] fragments = line.split(" ");
+            if (fragments.length < 3) continue;
             registers.put(fragments[0], Long.parseLong(fragments[2]));
         }
         return registers;
