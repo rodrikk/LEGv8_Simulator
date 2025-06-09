@@ -20,7 +20,7 @@ ADD x3, x0, x2
 // Store contents of register x3 into memory. Then load from memory into register x4.
 // Load x2 into register x5. Compare register x5 and register x2, branch if equal.
 
-aljfshdkfbn x27, #0x1
+MOVZ x27, #0x1
 LSL x27, x27, #28
 STURW x3, [x27, #5]
 LDURSW x4, [x27, #5]
